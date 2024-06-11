@@ -2,8 +2,14 @@
 name = "episode-1-async"
 version = "0.1.0"
 edition = "2021"
+default-run = "default"
 
 [dependencies]
+futures = "0.3.30"
+
+[[bin]]
+name = "default"
+path = "src/main.rs"
 
 [[bin]]
 name = "sibling"

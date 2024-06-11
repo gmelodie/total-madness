@@ -1,18 +1,20 @@
 struct Task {
     name: String,
     done: bool,
+    max_runs: usize,
     run_counter: usize,
-    func: fn(usize), // new: f is a variable of type function pointer
+    func: fn(usize),
 }
 
 impl Task {
-    // f is a pointer to a fn that takes a usize as first (and only) argument and returns nothing
-    fn new(name: String, f: fn(usize)) -> Self {
+    fn new(name: String, max_runs: usize, f: fn(usize)) -> Self {
+        // f is a pointer to a fn that takes a usize as first (and only) argument and returns nothing
         Self {
             name,
             done: false,
+            max_runs,
             run_counter: 0,
-            func: f, // new!
+            func: f,
         }
     }
 
@@ -21,13 +23,13 @@ impl Task {
     }
 
     fn run(&mut self) {
-        if self.run_counter == 100 {
+        if self.run_counter == self.max_runs {
             self.done = true;
             return;
         }
         self.run_counter += 1;
 
-        (self.func)(1); // new!
+        (self.func)(1);
     }
 }
 
@@ -50,15 +52,13 @@ impl Executor {
 fn main() {
     let mut executor = Executor::new();
 
-    executor
-        .tasks
-        .push(Task::new("task1".to_string(), brush_teeth)); // add task 1
-    executor
-        .tasks
-        .push(Task::new("task2".to_string(), brush_teeth)); // add task 2
-    executor
-        .tasks
-        .push(Task::new("task3".to_string(), brush_teeth)); // add task 3
+    let gabe = Task::new("gabe".to_string(), 20, brush_teeth);
+    let nathan = Task::new("nathan".to_string(), 30, brush_teeth);
+    let fefe = Task::new("fefe".to_string(), 100, brush_teeth);
+
+    executor.tasks.push(gabe);
+    executor.tasks.push(nathan);
+    executor.tasks.push(fefe);
 
     while executor.tasks.len() != 0 {
         for task in executor.tasks.iter_mut() {
