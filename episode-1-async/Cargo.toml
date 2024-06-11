@@ -1,0 +1,6 @@
+[package]
+name = "episode-1-async"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

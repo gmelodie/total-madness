@@ -1,33 +1,36 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 struct ToothbrushLock {
-    locked: bool,
+    locked: AtomicBool,
 }
 
 impl ToothbrushLock {
     fn new() -> Self {
-        Self { locked: false }
+        Self {
+            locked: AtomicBool::new(false),
+        }
     }
 
     fn lock(&mut self) {
-        while self.locked == true {}
-        self.locked = true;
+        while self.locked.load(Ordering::SeqCst) {}
+        self.locked.store(true, Ordering::SeqCst);
     }
 
     fn try_lock(&mut self) -> bool {
         let expected = false;
         let new = true;
-        return compare_and_exchange(&mut self.locked, expected, new);
+        match self
+            .locked
+            .compare_exchange(expected, new, Ordering::SeqCst, Ordering::SeqCst)
+        {
+            Ok(_) => return true,
+            Err(_) => return false,
+        }
     }
 
     fn unlock(&mut self) {
-        self.locked = false;
+        self.locked.store(false, Ordering::SeqCst);
     }
-}
-fn compare_and_exchange(original: &mut bool, expected: bool, new: bool) -> bool {
-    if *original == expected {
-        *original = new;
-        return true;
-    }
-    return false;
 }
 
 fn main() {
