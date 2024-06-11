@@ -2,14 +2,17 @@ struct Task {
     name: String,
     done: bool,
     run_counter: usize,
+    func: fn(usize), // new: f is a variable of type function pointer
 }
 
 impl Task {
-    fn new(name: String) -> Self {
+    // f is a pointer to a fn that takes a usize as first (and only) argument and returns nothing
+    fn new(name: String, f: fn(usize)) -> Self {
         Self {
-            name, // this is equivalent to `name: name`
+            name,
             done: false,
             run_counter: 0,
+            func: f, // new!
         }
     }
 
@@ -23,7 +26,14 @@ impl Task {
             return;
         }
         self.run_counter += 1;
-        println!("Hi from task: {}", self.name);
+
+        (self.func)(1); // new!
+    }
+}
+
+fn brush_teeth(times: usize) {
+    for i in 0..times {
+        println!("Brushing teeth {}", i);
     }
 }
 
@@ -40,9 +50,15 @@ impl Executor {
 fn main() {
     let mut executor = Executor::new();
 
-    executor.tasks.push(Task::new("task1".to_string())); // add task 1
-    executor.tasks.push(Task::new("task2".to_string())); // add task 2
-    executor.tasks.push(Task::new("task3".to_string())); // add task 3
+    executor
+        .tasks
+        .push(Task::new("task1".to_string(), brush_teeth)); // add task 1
+    executor
+        .tasks
+        .push(Task::new("task2".to_string(), brush_teeth)); // add task 2
+    executor
+        .tasks
+        .push(Task::new("task3".to_string(), brush_teeth)); // add task 3
 
     while executor.tasks.len() != 0 {
         for task in executor.tasks.iter_mut() {
