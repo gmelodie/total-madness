@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+
 [[bin]]
 name = "sibling"
 path = "bin/sibling.rs"
+
+[[bin]]
+name = "naive"
+path = "bin/naive.rs"
