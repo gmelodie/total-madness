@@ -1,12 +1,12 @@
-use futures::task::noop_waker;
 use std::future::Future;
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{Context, Poll, Waker};
 
 pub struct Task {
     name: String,
     done: bool,
-    pub future: Pin<Box<dyn Future<Output = String>>>,
+    future: Pin<Box<dyn Future<Output = String>>>,
+    waker: Waker,
 }
 
 impl Task {
@@ -15,6 +15,7 @@ impl Task {
             name,
             done: false,
             future: Box::pin(future),
+            waker: futures::task::noop_waker(),
         }
     }
 
@@ -23,8 +24,11 @@ impl Task {
     }
 
     pub fn poll(&mut self) -> String {
-        let binding = noop_waker();
-        let mut cx = Context::from_waker(&binding);
+        let mut cx = Context::from_waker(&self.waker);
+
+        if self.done {
+            return "Ready".to_string();
+        }
 
         match self.future.as_mut().poll(&mut cx) {
             Poll::Ready(output) => {
