@@ -6,6 +6,7 @@ default-run = "default"
 
 [dependencies]
 futures = "0.3.30"
+async-std = { version = "*", features = ["unstable"] }
 
 [[bin]]
 name = "default"
