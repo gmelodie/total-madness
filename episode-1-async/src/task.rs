@@ -3,7 +3,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll, Waker};
 
 pub struct Task {
-    name: String,
+    pub name: String,
     done: bool,
     future: Pin<Box<dyn Future<Output = String>>>,
     waker: Waker,
