@@ -1,31 +1,32 @@
 use futures::pending;
 use std::cell::UnsafeCell;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct ToothbrushLock {
-    locked: UnsafeCell<bool>,
+    locked: UnsafeCell<AtomicBool>,
 }
 
 impl ToothbrushLock {
     pub fn new() -> Self {
         Self {
-            locked: UnsafeCell::new(false),
+            locked: UnsafeCell::new(AtomicBool::new(false)),
         }
     }
 
     pub async fn lock(&self) -> ToothbrushGuard {
         unsafe {
             pending!();
-            while *self.locked.get() == true {
+            while (&*self.locked.get()).load(Ordering::SeqCst) == true {
                 pending!();
             }
-            *self.locked.get() = true;
+            (&*self.locked.get()).store(true, Ordering::SeqCst);
             ToothbrushGuard::new(self)
         }
     }
 
     fn unlock(&self) {
         unsafe {
-            *self.locked.get() = false;
+            (&*self.locked.get()).store(false, Ordering::SeqCst);
         }
     }
 }

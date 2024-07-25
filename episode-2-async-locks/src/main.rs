@@ -1,20 +1,20 @@
+mod atomic_lock;
 mod executor;
+#[allow(dead_code)]
 mod lock;
 mod task;
 
 use std::sync::Arc;
 
+use atomic_lock::ToothbrushLock;
 use executor::Executor;
-use futures::pending;
-use lock::ToothbrushLock;
+// use lock::ToothbrushLock;
 use task::Task;
 
 async fn brush_teeth(brush_lock: Arc<ToothbrushLock>, times: usize) -> String {
     for i in 0..times {
-        let mut guard = brush_lock.lock(); // new!
+        brush_lock.lock().await;
         println!("Brushing teeth {}", i);
-        pending!();
-        guard.unlock(); // new!
     }
     return "Done".to_string();
 }
@@ -22,7 +22,7 @@ async fn brush_teeth(brush_lock: Arc<ToothbrushLock>, times: usize) -> String {
 fn main() {
     let mut executor = Executor::new();
 
-    let brush_lock = Arc::new(ToothbrushLock::new()); // new! (literally)
+    let brush_lock = Arc::new(ToothbrushLock::new());
 
     let task_gabe = Task::new("gabe".to_string(), brush_teeth(brush_lock.clone(), 20));
     let task_nat = Task::new("nat".to_string(), brush_teeth(brush_lock.clone(), 30));
